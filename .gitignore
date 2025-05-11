@@ -176,3 +176,5 @@ cython_debug/
 *.csv
 *.csv.gz
 *.json
+*.jsonl
+*.parquet
