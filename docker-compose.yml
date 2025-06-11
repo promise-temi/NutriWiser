@@ -1,0 +1,30 @@
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongo-nutriwiser
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=nutriwiser
+      - MONGO_INITDB_ROOT_PASSWORD=nutriwiser
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongdata:/data/db
+    restart: unless-stopped
+  
+  postgres:
+    image: postgres
+    container_name: postgres-nutriwiser
+    environment:
+      - POSTGRES_USER=nutriwiser
+      - POSTGRES_PASSWORD=nutriwiser
+      - POSTGRES_DB=nutriwiser_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  mongdata:
+  pgdata:
