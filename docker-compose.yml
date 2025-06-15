@@ -1,5 +1,7 @@
+version: '3.8'
 
 services:
+  # Base de données MongoDB
   mongo:
     image: mongo
     container_name: mongo-nutriwiser
@@ -11,20 +13,35 @@ services:
     volumes:
       - mongdata:/data/db
     restart: unless-stopped
-  
-  postgres:
-    image: postgres
-    container_name: postgres-nutriwiser
+
+  # Base de données MySQL
+  mysql:
+    image: mysql:8
+    container_name: mysql-nutriwiser
     environment:
-      - POSTGRES_USER=nutriwiser
-      - POSTGRES_PASSWORD=nutriwiser
-      - POSTGRES_DB=nutriwiser_db
+      - MYSQL_ROOT_PASSWORD=nutriwiser
+      - MYSQL_DATABASE=nutriwiser_db
+      - MYSQL_USER=nutriwiser
+      - MYSQL_PASSWORD=nutriwiser
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-    restart: unless-stopped
+      - mysqldata:/var/lib/mysql
+    restart: unless-stopped 
+
+  # PHPMyAdmin pour MySQL
+  phpmyadmin:                                                             
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-nutriwiser
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: nutriwiser
+      PMA_PASSWORD: nutriwiser
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
 
 volumes:
   mongdata:
-  pgdata:
+  mysqldata:
