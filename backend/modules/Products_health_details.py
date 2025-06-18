@@ -1,7 +1,7 @@
 import requests
 import mysql.connector
 from pymongo import MongoClient
-
+import re
 
 class ProductHealthDetails:
     def __init__(self):
@@ -86,16 +86,28 @@ class ProductHealthDetails:
                 print(f"L'additif {additive} n'existe pas dans la base de données MongoDB")
                 return None
 
-    def Product_macronutrients_details_comparaison(self, product_info, user_profile):
-        product_macronutrients = {
-        # Macronutriments
-        "sucres": product_info["sucres"],
-        "glucides": product_info["glucides"],
-        "proteines": product_info["proteines"],
-        "lipides": product_info["lipides"],
-        "gras_satures": product_info["gras_satures"],
-        "trans_fats": product_info["gras_satures"],
-        "fibres": product_info["fibres"],
-        "sodium": product_info["sodium"]
-    }
-        return 
+    def verify_product_is_recalled(self, brand):
+        # Nettoyage pour la regex : enlever les articles comme "la", "le", etc.
+        cleaned = re.sub(r"\b(la|le|l'|les|des|de|du|d')\b", "", brand, flags=re.IGNORECASE).strip()
+
+        # Crée une regex insensible à la casse
+        brand_regex = re.compile(cleaned, re.IGNORECASE)
+        filter={'marque': brand_regex}
+        project={
+            'conseils': 1,
+            'Preconisation_sanitaire': 1,
+            'fiche_rappel_lien': 1,
+            'marque': 1,
+            '_id': 0
+        }
+   
+        result = self.client['nutriwiser_db']['rappels_produits_alimentaires'].find(
+        filter=filter,
+        projection=project
+        )
+        result = list(result)
+        return result
+
+
+
+   
