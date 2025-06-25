@@ -4,6 +4,7 @@ import mysql.connector
 from modules.Products_health_details import ProductHealthDetails
 from modules.OFF_api import OpenFoodFactsAPI
 from modules.Health_F import Health_Form
+from modules.User_auth import User_Auth
 
 import requests
 from fastapi import FastAPI , Request , HTTPException
@@ -21,14 +22,13 @@ cursor = conn.cursor()
 
 app = FastAPI()
 
-@app.middleware("http")
-async def verify_token(request: Request, call_next):
-    token = request.query_params.get("token")
-    expected_token = "1234"
-
-    if token != expected_token:
-        raise HTTPException(status_code=403, detail="Accès interdit : token manquant ou invalide")
-    return await call_next(request)
+# @app.middleware("http")
+# async def verify_token(request: Request, call_next):
+#     token = request.query_params.get("token")
+#     expected_token = "12345678"
+#     if token != expected_token:
+#         raise HTTPException(status_code=403, detail="Accès interdit : token manquant ou invalide")
+#     return await call_next(request)
 
 
 
@@ -57,4 +57,23 @@ def get_product_health_details(item_qr_code):
     return complete_product_info, recall_final_data
 
 
+user_auth = User_Auth()
+@app.get("/register")
+async def regiter_user(username: str, password: str):
+    username = username.lower().strip()
+    password = password
+    
+    if user_auth.create_user(username, password):
+        return {"message": "utilisateur créé avec succès."}
+    else:
+        return {"message": "Échec de la création de l'utilisateur. Veuillez réessayer."}
 
+@app.get("/login")
+async def login_user(username: str, password: str):
+    username = username.lower().strip()
+    password = password
+
+    if user_auth.verify_user(username, password):
+        return {"message": "User verified successfully."}
+    else:
+        return {"message": "Invalid credentials."}

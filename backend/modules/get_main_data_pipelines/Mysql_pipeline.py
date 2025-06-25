@@ -18,6 +18,11 @@ class Mysql_Pipeline:
         self.client.close()
 
     def create_database(self):
+        """
+        Cette methode créé les tables nécessaires dans la base de données MySQL pour stocker les données des additifs alimentaires.
+        Elle lit les instructions SQL depuis un fichier externe et les exécute pour créer les tables.
+        """
+
         try:
             with open("modules/mysql_creation.sql", "r", encoding="utf-8") as f:
                 sql = f.read()
@@ -26,11 +31,16 @@ class Mysql_Pipeline:
                 if stmt:
                     self.cursor.execute(stmt)
             self.conn.commit()
-            print("✅ Tables créées avec succès.")
+            print(" Tables créées avec succès.")
         except Exception as e:
             print("Erreur création DB :", e)
 
     def insert_distinct_classes(self):
+        """
+        Cette méthode insère les classes d'additifs distinctes dans la table 'classes'.
+        Elle récupère les classes depuis la collection 'additifs_scraped' de MongoDB.
+        """
+
         db = self.client["nutriwiser_db"]
         collection = db["additifs_scraped"]
         distinct_classes = collection.distinct("additive_classes")
@@ -41,6 +51,11 @@ class Mysql_Pipeline:
         self.conn.commit()
 
     def insert_additives_names(self):
+        """
+        Cette méthode insère les noms distincts des additifs dans la table 'toxicite'.
+        Elle récupère les noms depuis la collection 'additifs_scraped' de MongoDB.
+        """
+
         db = self.client["nutriwiser_db"]
         collection = db["additifs_scraped"]
         distinct_names = collection.distinct("danger")
@@ -51,16 +66,23 @@ class Mysql_Pipeline:
         self.conn.commit()
 
     def insert_all_additives_data(self):
+        """
+        Cette méthode insère toutes les données des additifs dans les tables MySQL.
+        Elle récupère les données depuis la collection 'additifs_scraped' de MongoDB.
+        Elle insère les additifs, leurs noms alternatifs, classes et toxicité dans les tables appropriées.
+        """
+        #Récupération des données depuis MongoDB
         db = self.client["nutriwiser_db"]
         collection = db["additifs_scraped"]
         results = collection.find({})
 
+        # Pour chaque document, on insère les données dans MySQL
         for doc in results:
             try:
                 code = doc.get('additive_code')
                 if not code:
                     continue
-
+                # Récupération des champs nécessaires
                 names = doc.get('names') or []
                 label_toxicite = (doc.get('danger') or '').strip()
                 classes = doc.get('additive_classes', [])
@@ -96,6 +118,7 @@ class Mysql_Pipeline:
                     label = label.strip()
                     self.cursor.execute("SELECT id FROM classes WHERE label = %s", (label,))
                     row = self.cursor.fetchone()
+                    # Si la classe n'existe pas, on l'insère
                     if not row:
                         self.cursor.execute("INSERT INTO classes (label) VALUES (%s)", (label,))
                         self.conn.commit()
@@ -116,6 +139,7 @@ class Mysql_Pipeline:
 
 
     def run_pipeline(self):
+        # Exécution du pipeline complet
         pipeline = Mysql_Pipeline()
         pipeline.create_database()
         pipeline.insert_additives_names()
