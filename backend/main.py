@@ -19,16 +19,23 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
-
 app = FastAPI()
 
-# @app.middleware("http")
-# async def verify_token(request: Request, call_next):
-#     token = request.query_params.get("token")
-#     expected_token = "12345678"
-#     if token != expected_token:
-#         raise HTTPException(status_code=403, detail="Accès interdit : token manquant ou invalide")
-#     return await call_next(request)
+user_auth = User_Auth()
+
+@app.middleware("http")
+async def verify_token(request: Request, call_next):
+    if request.url.path in ["/login", "/docs", "/register"]:
+        return await call_next(request)
+    else:
+        # Vérification du token dans les paramètres de la requête
+        token = request.query_params.get("token")
+        
+        if user_auth.verify_token(token):
+            return await call_next(request)
+        else:
+            raise HTTPException(status_code=403, detail="Accès interdit : token manquant ou invalide")
+        
 
 
 
@@ -57,12 +64,12 @@ def get_product_health_details(item_qr_code):
     return complete_product_info, recall_final_data
 
 
-user_auth = User_Auth()
+
 @app.get("/register")
 async def regiter_user(username: str, password: str):
     username = username.lower().strip()
     password = password
-    
+    user_auth = User_Auth()
     if user_auth.create_user(username, password):
         return {"message": "utilisateur créé avec succès."}
     else:
@@ -72,8 +79,10 @@ async def regiter_user(username: str, password: str):
 async def login_user(username: str, password: str):
     username = username.lower().strip()
     password = password
-
+    user_auth = User_Auth()
+    print("Attempting login for user:", username)
     if user_auth.verify_user(username, password):
-        return {"message": "User verified successfully."}
+        token = user_auth.create_token(username)
+        return {"message": "User verified successfully.", "token": token}
     else:
         return {"message": "Invalid credentials."}

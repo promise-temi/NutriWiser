@@ -1,8 +1,14 @@
 import bcrypt
 import jwt
-from datetime import datetime, timedelta
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+
+
+from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 import mysql.connector
+
+SECRET_KEY = "ton_secret_ultra_sécurisé"
+ALGORITHM = "HS256"
 
 class User_Auth:
     def __init__(self):
@@ -63,4 +69,36 @@ class User_Auth:
         else:
             print("User verification failed.")
             return False
-        
+    
+    def create_token(self, username):
+        """
+        Cette méthode crée un token JWT pour l'utilisateur authentifié.
+        Elle prend en paramètre le nom d'utilisateur et génère un token qui expire dans 1 heure.
+        Elle retourne le token JWT.
+        """
+        payload = {
+            "sub": username,  # subject = l'utilisateur
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1)  # expire dans 1 heure
+        }
+
+        token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        return token
+    
+
+    def verify_token(self, token):
+        """
+        Cette méthode vérifie la validité d'un token JWT.
+        Elle prend en paramètre le token JWT et tente de le décoder.
+        Si le token est valide, elle retourne True, sinon elle gère les exceptions
+        pour les tokens expirés ou invalides et retourne False.
+        """
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            # Si tu veux, tu peux retourner aussi le payload
+            return True
+        except ExpiredSignatureError:
+            print("Token expiré")
+            return False
+        except InvalidTokenError:
+            print("Token invalide")
+            return False

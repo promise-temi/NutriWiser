@@ -50,9 +50,9 @@ class Additive_Pipeline:
                 # Récupération des données principales de l'additif issues de la page web
                 'additive_code': row.select_one('td.colCode').get_text(strip=True),
                 'names': row.select_one('td.colNom').get_text(strip=True).split(', '),
-                'danger': row.select_one('td.colDanger').get_text(strip=True),
+                'danger': row.select_one('td.colDanger').get_text(strip=True) if row.select_one('td.colDanger') else "Danger non speécifié",
                 # Récupération des données additionnelles de l'additif issues des données OpenFoodFacts
-                'additive_classes': additive_classes,
+                'additive_classes': additive_classes if additive_classes else "Aucune classe d'additif spécifiée",
             }
             additives_list.append(additive_dict)
        
