@@ -138,7 +138,7 @@ class Additive_Pipeline:
         collection_scraped = self.db["additifs_scraped"]
         collection_scraped.delete_many({})
 
-        with open("../data/additives_complet_data.json", encoding="utf-8") as f:
+        with open("data/additives_complet_data.json", encoding="utf-8") as f:
             data = json.load(f)
 
         if isinstance(data, list):
@@ -152,7 +152,7 @@ class Additive_Pipeline:
         collection_additional = self.db["additifs"]
         collection_additional.delete_many({})  # Optionnel, selon ton besoin
 
-        with open("../data/additives_additional_data.json", encoding="utf-8") as f:
+        with open("data/additives_additional_data.json", encoding="utf-8") as f:
             data = json.load(f)
 
         collection_additional.insert_one({

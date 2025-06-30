@@ -24,7 +24,7 @@ class Mysql_Pipeline:
         """
 
         try:
-            with open("modules/mysql_creation.sql", "r", encoding="utf-8") as f:
+            with open("modules/get_main_data_pipelines/mysql_creation.sql", "r", encoding="utf-8") as f:
                 sql = f.read()
             for statement in sql.split(';'):
                 stmt = statement.strip()
