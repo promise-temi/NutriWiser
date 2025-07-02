@@ -19,13 +19,17 @@ conn = mysql.connector.connect(
 )
 cursor = conn.cursor()
 
-app = FastAPI()
+app = FastAPI(
+    title="NutriWiser API",
+    description="API pour l'application NutriWiser, fournissant des informations nutritive et sanitaires sur les produits alimentaires.",
+    version="1.0.0",
+)
 
 user_auth = User_Auth()
 
 @app.middleware("http")
 async def verify_token(request: Request, call_next):
-    if request.url.path in ["/login", "/docs", "/register"]:
+    if request.url.path in ["/login", "/docs", "/register", "/openapi.json", "/redoc" , "/"]:
         return await call_next(request)
     else:
         # Vérification du token dans les paramètres de la requête
@@ -35,12 +39,15 @@ async def verify_token(request: Request, call_next):
             return await call_next(request)
         else:
             raise HTTPException(status_code=403, detail="Accès interdit : token manquant ou invalide")
+            
         
+@app.get("/", description="Page d'accueil de l'API NutriWiser", tags=["Home"], response_model=dict)
+def home():
+    return {"message": "Bienvenue sur l'API NutriWiser. Rendez-vous sur la documentation pour découvrir les fonctionnalités disponibles."}
 
 
-
-@app.get("/product_full_health_details")
-def get_product_health_details(item_qr_code):
+@app.get("/product_full_health_details", description="Prend en entrée le code QR d'un produit et renvoie des informations sur les additifs présents et les rappels sanitaire. Route protectée, nécessite un token d'authentification.", response_model= list, tags=["Product Health Details"])
+def get_product_health_details(item_qr_code : str, token: str):
     # Récupération des informations du produit à partir de l'API Open Food 
     Product_Health_data = ProductHealthDetails()
     OFFAPI = OpenFoodFactsAPI()
@@ -61,11 +68,11 @@ def get_product_health_details(item_qr_code):
     
 
     
-    return complete_product_info, recall_final_data
+    return [complete_product_info, recall_final_data]
 
 
 
-@app.get("/register")
+@app.get("/register" , description="Enregistre un nouvel utilisateur avec un nom d'utilisateur et un mot de passe.", tags=["Registration"], response_model=dict)
 async def regiter_user(username: str, password: str):
     username = username.lower().strip()
     password = password
@@ -75,7 +82,10 @@ async def regiter_user(username: str, password: str):
     else:
         return {"message": "Échec de la création de l'utilisateur. Veuillez réessayer."}
 
-@app.get("/login")
+
+
+
+@app.get("/login" , description="Connecte un utilisateur avec un nom d'utilisateur et un mot de passe. Renvoie un token d'authentification en cas de succès.", tags=["Authentication"], response_model=dict)
 async def login_user(username: str, password: str):
     username = username.lower().strip()
     password = password
