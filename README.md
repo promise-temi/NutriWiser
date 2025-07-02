@@ -1,3 +1,3 @@
 # NutriWiser
 
-Bonjour, allez conculter la branche dévelop.
+Bonjour, allez consulter la branche dévelop.
