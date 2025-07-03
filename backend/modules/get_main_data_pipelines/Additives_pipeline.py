@@ -23,7 +23,7 @@ class Additive_Pipeline:
         options = Options()
         options.add_argument("--headless") # Exécute Chrome sans ouvrir de fenêtre
         driver = webdriver.Chrome(options=options)  
-
+        print(" Démarrage du scrapping des additifs alimentaires...")
         # Accès à la page des additifs alimentaires
         driver.get("https://www.additifs-alimentaires.net/additifs.php")
 
@@ -72,10 +72,13 @@ class Additive_Pipeline:
         options = Options()
         options.add_argument("--headless")
         driver = webdriver.Chrome(options=options)
-
+        print(" Démarrage du scrapping des données additionnelles des additifs alimentaires...")
+        # Récupération de la liste d'additifs principaux
         additives_list = self.get_additives_main_data_scrapping_and_json() # Récupération de la liste d'additifs principaux
         print(len(additives_list))
         complete_additives_list = []
+        # Pour chaque additif, on scrappe les données additionnelles
+        # On construit l'URL de la page de l'additif concerné en utilisant
         for additive in additives_list:
             code = additive['additive_code']
             url = f"https://www.additifs-alimentaires.net/{code}.php#toxic" # Construction de l'URL pour accéder à la page de l'additif concerné
@@ -97,6 +100,7 @@ class Additive_Pipeline:
                 additive['remarques'] = remarques
                 
                 complete_additives_list.append(additive)
+                print(f"Additif {code} scrappé avec succès.")
             except Exception as e:
                 print(f"Erreur lors de la récupération de la page pour {code}: {e}")
                 continue

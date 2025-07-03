@@ -31,14 +31,14 @@ class RappelsPipeline:
             list_rappels_mongo = []
             for fiche in rappels_produits_alimentaires_d_actualite:
                 fiche_rappel = {
-                "nom" :  fiche.get("libelle"),
-                "marque" :  fiche.get("marque_produit"),
-                "motif_rappel"  : fiche.get("motif_rappel"),
-                "conseils" : fiche.get("conduites_a_tenir_par_le_consommateur"),
-                "images" : fiche.get("liens_vers_les_images"),
-                "affichette_pdf" : fiche.get("lien_vers_affichette_pdf"),
-                "fiche_rappel_lien" : fiche.get("lien_vers_la_fiche_rappel"),
-                "Preconisation_sanitaire" : fiche.get("preconisations_sanitaires"),
+                "nom" :  fiche.get("libelle") if fiche.get("libelle") else "Aucun nom renseigné",
+                "marque" :  fiche.get("marque_produit") if fiche.get("marque_produit") else "Aucune marque renseignée",
+                "motif_rappel"  : fiche.get("motif_rappel") if fiche.get("motif_rappel") else "Aucun motif renseigné",
+                "conseils" : fiche.get("conduites_a_tenir_par_le_consommateur") if fiche.get("conduites_a_tenir_par_le_consommateur") else "Aucun conseil renseigné",
+                "images" : fiche.get("liens_vers_les_images") if fiche.get("liens_vers_les_images") else "Aucune image disponible",
+                "affichette_pdf" : fiche.get("lien_vers_affichette_pdf") if fiche.get("lien_vers_affichette_pdf") else "Aucune affichette PDF disponible",
+                "fiche_rappel_lien" : fiche.get("lien_vers_la_fiche_rappel") if fiche.get("lien_vers_la_fiche_rappel") else "Aucun lien vers la fiche de rappel",
+                "Preconisation_sanitaire" : fiche.get("preconisations_sanitaires") if fiche.get("preconisations_sanitaires") else "Aucune préconisation sanitaire renseignée",
                 }
 
                 list_rappels_mongo.append(fiche_rappel)
@@ -47,6 +47,7 @@ class RappelsPipeline:
             client = MongoClient("mongodb://localhost:27017")
             db = client["nutriwiser_db"]
             collection = db["rappels_produits_alimentaires"]
+            collection.delete_many({})  # Vide la collection avant réinsertion
             collection.insert_many(list_rappels_mongo)
             print(f"[+] {collection.count_documents({})} fiches insérées dans la base de données MongoDB")
             

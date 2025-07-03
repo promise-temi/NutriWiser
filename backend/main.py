@@ -5,6 +5,7 @@ from modules.Products_health_details import ProductHealthDetails
 from modules.OFF_api import OpenFoodFactsAPI
 from modules.Health_F import Health_Form
 from modules.User_auth import User_Auth
+from get_data import get_data
 
 import requests
 from fastapi import FastAPI , Request , HTTPException
@@ -96,3 +97,16 @@ async def login_user(username: str, password: str):
         return {"message": "User verified successfully.", "token": token}
     else:
         return {"message": "Invalid credentials."}
+
+
+@app.get("/delete_user" , description="Supprime un utilisateur de la base de données avec un nom d'utilisateur et un mot de passe.", tags=["User Management"], response_model=dict)
+async def delete_user(username: str, password: str):
+    username = username.lower().strip()
+    password = password
+    user_auth = User_Auth()
+    if user_auth.delete_user(username, password):
+        return {"message": "User deleted successfully."}
+    else:
+        return {"message": "Failed to delete user. Please check your credentials."}
+
+

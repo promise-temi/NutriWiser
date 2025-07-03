@@ -1,6 +1,6 @@
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
-from NutriWiser.backend.modules.get_main_data_pipelines.Produits_rappels_pipeline import RappelsPipeline
+from modules.get_main_data_pipelines.Produits_rappels_pipeline import RappelsPipeline
 
 app = Flask(__name__)
 
@@ -18,4 +18,5 @@ def home():
     return "API NutriWiser est en ligne via http://localhost:5000"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
+
