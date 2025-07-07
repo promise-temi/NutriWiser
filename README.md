@@ -77,12 +77,7 @@ Certaines routes sont protégées par un token.
 
 ### Exemple d’appel à une route protégée :
 
-/product_full_health_details?item_qr_code=XYZ&token=VOTRE_TOKEN
+- Creer votre compte afin de pouvoir vous connecter. lors d'une connection réussie vous serez attribué un tocken. Entrez ce tocken dans l'onglet autorize du swagger fast api. Une fois connecter vous pourrez interroger les routes protégées pendant 1h.
 
-### À venir :
 
-Interface utilisateur
 
-Système de scoring santé
-
-Historique utilisateur
