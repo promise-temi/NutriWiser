@@ -8,8 +8,9 @@ from modules.User_auth import User_Auth
 from get_data import get_data
 
 import requests
-from fastapi import FastAPI , Request , HTTPException
-
+from fastapi import FastAPI , Request , HTTPException, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+security = HTTPBearer()
 
 client = MongoClient("mongodb://localhost:27017")
 conn = mysql.connector.connect(
@@ -47,8 +48,8 @@ def home():
     return {"message": "Bienvenue sur l'API NutriWiser. Rendez-vous sur la documentation pour découvrir les fonctionnalités disponibles."}
 
 
-@app.get("/product_full_health_details", description="Prend en entrée le code QR d'un produit et renvoie des informations sur les additifs présents et les rappels sanitaire. Route protectée, nécessite un token d'authentification.", response_model= list, tags=["Product Health Details"])
-def get_product_health_details(item_qr_code : str, token: str):
+@app.get("/product_full_health_details", description="Prend en entrée le code QR d'un produit et renvoie des informations sur les additifs présents et les rappels sanitaire. Route protégée, nécessite un token d'authentification.", response_model= list, tags=["Product Health Details"])
+def get_product_health_details(item_qr_code : str, token: str, credentials: HTTPAuthorizationCredentials = Security(security)):
     # Récupération des informations du produit à partir de l'API Open Food 
     Product_Health_data = ProductHealthDetails()
     OFFAPI = OpenFoodFactsAPI()
@@ -73,7 +74,7 @@ def get_product_health_details(item_qr_code : str, token: str):
 
 
 
-@app.get("/register" , description="Enregistre un nouvel utilisateur avec un nom d'utilisateur et un mot de passe.", tags=["Registration"], response_model=dict)
+@app.get("/register" , description="Enregistre un nouvel utilisateur avec un nom d'utilisateur et un mot de passe.", tags=["Registration"], response_model=dict, )
 async def regiter_user(username: str, password: str):
     username = username.lower().strip()
     password = password

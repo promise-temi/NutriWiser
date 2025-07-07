@@ -10,7 +10,7 @@ class Mysql_Pipeline:
             password="nutriwiser",
             database="nutriwiser_db"
         )
-        self.cursor = self.conn.cursor()
+        self.cursor = self.conn.cursor(buffered=True)
 
     def close(self):
         self.cursor.close()
